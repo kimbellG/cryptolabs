@@ -2,6 +2,7 @@ package keyword
 
 import (
 	"testing"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -36,5 +37,55 @@ func TestOrder(t *testing.T) {
 
 			assert.Equal(t, tc.want, k.order, "order not equel")
 		})
+	}
+}
+
+func TestEncode(t *testing.T) {
+	tt := []struct {
+		key  string
+		arg  string
+		want string
+	}{
+		{
+			key:  "КРИПТОГРАФИЯ",
+			arg:  "ЭТО–_ЛЕКЦИЯ_ПО_АЛГОРИТМАМ_ШИФРОВАНИЯ",
+			want: "ЦЕОЯЭЛ–ТК_И_ИО_МПГАОРЛТААОШИМРИ_ВФНЯ",
+		},
+	}
+
+	for _, tc := range tt {
+		var (
+			crypto = New(tc.key)
+			got    = make([]rune, len([]rune(tc.arg)))
+		)
+
+		crypto.Encode(got, []rune(tc.arg))
+
+		assert.Equal(t, tc.want, string(got), "incorrect encryption")
+	}
+}
+
+func TestDecode(t *testing.T) {
+	tt := []struct {
+		key string
+		arg string
+	}{
+		{
+			key: "Артём",
+			arg: "ЭТО–_ЛЕКЦИЯ_ПО_АЛГОРИТМАМ_ШИФРОВАНИЯ",
+		},
+	}
+
+	for _, tc := range tt {
+		var (
+			crypto     = New(tc.key)
+			got        = make([]rune, utf8.RuneCountInString(tc.arg))
+			encryption = make([]rune, utf8.RuneCountInString(tc.arg))
+		)
+
+		crypto.Encode(encryption, []rune(tc.arg))
+		crypto.Decode(got, encryption)
+
+		assert.Equal(t, tc.arg, string(got), "decoding is incorrect")
 	}
 }
