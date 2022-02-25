@@ -1,5 +1,7 @@
 package sdes
 
+import "log"
+
 func rearrange(order []int, sequence []byte, seqLen int) []byte {
 	const (
 		byteLen = 8
@@ -32,6 +34,7 @@ func getBit(index int, b byte) byte {
 }
 
 func replaceBit(b byte, dst, src int) byte {
+	log.Println(b)
 	if dst < src {
 		return b >> (src - dst)
 	}
@@ -49,6 +52,14 @@ func halve10Bit(src []byte) (byte, byte) {
 
 func contact5Bit(left, right byte) []byte {
 	return []byte{left<<5 | right, 0x03 & left >> 5}
+}
+
+func halve8Bit(b byte) (byte, byte) {
+	return (0xF0 & b) >> 4, 0xF & b
+}
+
+func contact4Bit(left, right byte) byte {
+	return left<<4 | right
 }
 
 func rotateLeft5(b byte, k int) byte {

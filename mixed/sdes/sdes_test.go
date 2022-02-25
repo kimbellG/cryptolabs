@@ -26,6 +26,12 @@ func TestRearrange(t *testing.T) {
 			src:    []byte{0x5B, 0},
 			want:   []byte{0xB3},
 		},
+		{
+			order:  []int{4, 1, 2, 3, 2, 3, 4, 1},
+			srcLen: 4,
+			src:    []byte{0x7},
+			want:   []byte{0xBE},
+		},
 	}
 
 	for _, tc := range tt {
@@ -126,5 +132,89 @@ func TestKeyGenerate(t *testing.T) {
 		assert.Equal(t, tc.k1, k1, "invalid the first key")
 		assert.Equal(t, tc.k2, k2, "invalid the second key")
 
+	}
+}
+
+func TestHalve8Bits(t *testing.T) {
+	tt := []struct {
+		b    byte
+		l, r byte
+	}{
+		{
+			b: 0xBF,
+			l: 0xB,
+			r: 0xF,
+		},
+	}
+
+	for _, tc := range tt {
+		l, r := halve8Bit(tc.b)
+
+		assert.Equal(t, tc.l, l, "invalid left bits")
+		assert.Equal(t, tc.r, r, "invalid right bits")
+	}
+}
+
+func TestContact4Bits(t *testing.T) {
+	tt := []struct {
+		left, right byte
+		want        byte
+	}{
+		{
+			left:  0xF,
+			right: 0x3,
+			want:  0xF3,
+		},
+	}
+
+	for _, tc := range tt {
+		got := contact4Bit(tc.left, tc.right)
+
+		assert.Equal(t, tc.want, got, "")
+	}
+}
+
+func TestGetSBlockCord(t *testing.T) {
+	tt := []struct {
+		b        byte
+		row, col byte
+	}{
+		{
+			b:   0x9,
+			row: 3,
+			col: 0,
+		},
+	}
+
+	for _, tc := range tt {
+		row, col := getSBlockCord(tc.b)
+
+		assert.Equal(t, tc.row, row, "invalid row")
+		assert.Equal(t, tc.col, col, "invalid col")
+	}
+}
+
+func TestSBlock(t *testing.T) {
+	tt := []struct {
+		sblock [][]byte
+		b      byte
+		want   byte
+	}{
+		{
+			sblock: [][]byte{
+				{1, 0, 3, 2},
+				{3, 2, 1, 0},
+				{0, 2, 1, 3},
+				{3, 1, 3, 2},
+			},
+			b:    0x9,
+			want: 0x3,
+		},
+	}
+
+	for _, tc := range tt {
+		got := blockproc(tc.sblock, tc.b)
+
+		assert.Equal(t, tc.want, got, "")
 	}
 }
