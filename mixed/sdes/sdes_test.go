@@ -218,3 +218,86 @@ func TestSBlock(t *testing.T) {
 		assert.Equal(t, tc.want, got, "")
 	}
 }
+
+func TestRound(t *testing.T) {
+	tt := []struct {
+		input byte
+		key   byte
+
+		want byte
+	}{
+		{
+			input: 0x79,
+			key:   0xB3,
+
+			want: 0x79,
+		},
+	}
+
+	for _, tc := range tt {
+		block := SDES{}
+
+		block.s1 = [][]byte{
+			{1, 0, 3, 2},
+			{3, 2, 1, 0},
+			{0, 2, 1, 3},
+			{3, 1, 3, 2},
+		}
+		block.s2 = [][]byte{
+			{0, 1, 2, 3},
+			{2, 0, 1, 3},
+			{3, 0, 1, 0},
+			{2, 1, 0, 3},
+		}
+
+		got := block.round(tc.input, tc.key)
+
+		assert.Equal(t, tc.want, got, "")
+	}
+}
+
+func TestEncrypt(t *testing.T) {
+	tt := []struct {
+		key   []byte
+		input byte
+
+		want byte
+	}{
+		{
+			key:   []byte{0x53, 0x2},
+			input: 0xB6,
+
+			want: 0x0F,
+		},
+	}
+
+	for _, tc := range tt {
+		block := New(tc.key)
+
+		got := block.encrypt(tc.input)
+		assert.Equal(t, tc.want, got, "")
+	}
+}
+
+func TestDecrypt(t *testing.T) {
+	tt := []struct {
+		key   []byte
+		input byte
+
+		want byte
+	}{
+		{
+			key:   []byte{0x53, 0x2},
+			input: 0x0F,
+
+			want: 0xB6,
+		},
+	}
+
+	for _, tc := range tt {
+		block := New(tc.key)
+
+		got := block.decrypt(tc.input)
+		assert.Equal(t, tc.want, got, "")
+	}
+}
