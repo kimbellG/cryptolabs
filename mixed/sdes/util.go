@@ -1,7 +1,5 @@
 package sdes
 
-import "log"
-
 func rearrange(order []int, sequence []byte, seqLen int) []byte {
 	const (
 		byteLen = 8
@@ -34,7 +32,6 @@ func getBit(index int, b byte) byte {
 }
 
 func replaceBit(b byte, dst, src int) byte {
-	log.Println(b)
 	if dst < src {
 		return b >> (src - dst)
 	}

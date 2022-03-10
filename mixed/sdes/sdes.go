@@ -112,7 +112,9 @@ func getSBlockCord(b byte) (byte, byte) {
 
 // Decrypt decrypts src encryption to the source text for the SDES algorithm.
 func (s SDES) Decrypt(dst, src []byte) {
-
+	for i, b := range src {
+		dst[i] = s.decrypt(b)
+	}
 }
 
 func (s SDES) decrypt(b byte) byte {
