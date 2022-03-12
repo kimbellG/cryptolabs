@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"unsafe"
 
 	"github.com/kimbellG/cryptolabs/hash/murmurhash3"
 )
@@ -17,21 +16,17 @@ func main() {
 	var (
 		buf = make([]byte, 4*1024)
 
-		hash uint32
+		hash = murmurhash3.NewHash32(21)
 
 		n   int
 		err error
 	)
 
 	for n, err = os.Stdin.Read(buf); err == nil; n, err = os.Stdin.Read(buf[4:]) {
-		var hashBytes []byte
-
-		if hash != 0 {
-			hashBytes = (*[4]byte)(unsafe.Pointer(&hash))[:]
-			copy(buf[0:4], hashBytes)
+		_, err := hash.Write(buf[:n])
+		if err != nil {
+			log.Fatalf("%s: hash iteration: %v", os.Args[0], err)
 		}
-
-		hash = murmurhash3.Sum32WithSeed(buf[:n+len(hashBytes)], seed)
 	}
 
 	if !errors.Is(err, io.EOF) {
@@ -39,13 +34,12 @@ func main() {
 	}
 
 	if n > 0 {
-
-		hashBytes := (*[4]byte)(unsafe.Pointer(&hash))[:]
-		copy(buf[0:4], hashBytes)
-
-		hash = murmurhash3.Sum32WithSeed(buf[:n+len(hashBytes)], seed)
+		_, err := hash.Write(buf[:n])
+		if err != nil {
+			log.Fatalf("%s: last hash iteration: %v", os.Args[0], err)
+		}
 	}
 
-	os.Stdout.WriteString(fmt.Sprintf("hash32: 0x%x\n", hash))
+	os.Stdout.WriteString(fmt.Sprintf("hash32: 0x%x\n", hash.SumAndClean()))
 
 }
